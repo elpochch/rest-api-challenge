@@ -1,15 +1,14 @@
-from sqlalchemy import create_async_engine
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
-from app.config import Settings
-from models.definitions import Base
+from app.config import settings
+from app.models.definitions import Base
 
-async_engine = create_async_engine(Settings.POSTGRES_URL, echo=True)
+async_engine = create_async_engine(settings.POSTGRES_URL, echo=True)
+
 
 async def init_db():
-    async with AsyncSession(async_engine) as session:
-        async with session.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
+    async with async_engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
 
 async def get_session() -> AsyncSession:
     async_session = sessionmaker(
